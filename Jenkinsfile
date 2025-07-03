@@ -2,24 +2,27 @@ pipeline {
     agent any
 
     stages {
+        
+
+       
         stage('Build and Test - Scenario 1 (Success)') {
             steps {
                 script {
                     echo 'Iniciando o build e teste no container Docker...'
 
-                    
                     docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado.'
-                        
+
                     }
 
-                    
+
                     docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                        sh 'pytest tests/'
+
                         echo 'Testes executados com sucesso no container Docker.'
                     }
                 }
             }
+
             post {
                 success {
                     echo 'Cenário 1: Build e Testes OK!'
@@ -27,21 +30,23 @@ pipeline {
             }
         }
 
-        
+
         stage('Build - Scenario 2 (Build Failure)') {
             steps {
                 script {
                     echo 'Tentando build para Cenário 2 (simulando falha de compilação/linting)...'
                     try {
-                        
+
                         docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
-                            sh 'python -c "import sys; print(\'Simulando erro de sintaxe\'); sys.exit(1)"'
+                            sh """python -c "import sys; print('Simulando erro de sintaxe ou de build'); sys.exit(1)""""
                         }
                         
                         error('O build deveria ter falhado para o Cenário 2, mas passou. Verifique o código fonte ou o comando de simulação.')
                     } catch (Exception e) {
+            
                         echo "Cenário 2: Build falhou como esperado: ${e.getMessage()}"
-                        throw e 
+                        
+                        throw e
                     }
                 }
             }
@@ -61,21 +66,22 @@ pipeline {
                 script {
                     echo 'Iniciando build e teste para Cenário 3 (simulando falha de teste)...'
 
-                    /
+                    
                     docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado para Cenário 3.'
                     }
 
-                    
+                   
                     try {
                         docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                            sh 'pytest tests/'
+                            sh """pytest tests/""" // Corrigido para aspas triplas duplas
                         }
                         
                         error('Os testes deveriam ter falhado para o Cenário 3, mas passaram. Verifique o código fonte.')
                     } catch (Exception e) {
+                        
                         echo "Cenário 3: Testes falharam como esperado: ${e.getMessage()}"
-                        currentBuild.result = 'UNSTABLE' 
+                        currentBuild.result = 'UNSTABLE'
                     }
                 }
             }
@@ -92,11 +98,10 @@ pipeline {
 
     
     triggers {
-
+       
         cron 'H H * * *' 
     }
 
-    // Ações que acontecem após a conclusão de todo o pipeline
     post {
         always {
             echo 'Pipeline concluído.'
