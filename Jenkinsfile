@@ -1,27 +1,27 @@
 pipeline {
     agent any
     stages {
-        // stage('Build and Test - Scenario 1 (Success)') {
-        //     steps {
-        //         script {
-        //             echo 'Iniciando o build e teste no container Docker...'
+        stage('Build and Test - Scenario 1 (Success)') {
+            steps {
+                script {
+                    echo 'Iniciando o build e teste no container Docker...'
 
-        //             docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
-        //                 echo 'Dependências instaladas e ambiente de build preparado.'
-        //             }
-        //             docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
+                    docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
+                        echo 'Dependências instaladas e ambiente de build preparado.'
+                    }
+                    docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
                         
-        //                 sh """PYTHONPATH=. pytest tests/""" 
-        //                 echo 'Testes executados com sucesso no container Docker.'
-        //             }
-        //         }
-        //     }
-        //     post {
-        //         success {
-        //             echo 'Cenário 1: Build e Testes OK!'
-        //         }
-        //     }
-        // }
+                        sh """PYTHONPATH=. pytest tests/""" 
+                        echo 'Testes executados com sucesso no container Docker.'
+                    }
+                }
+            }
+            post {
+                success {
+                    echo 'Cenário 1: Build e Testes OK!'
+                }
+            }
+        }
         // stage('Build - Scenario 2 (Build Failure)') {
         //     steps {
         //         script {
@@ -47,38 +47,38 @@ pipeline {
         //     }
         // }
 
-        stage('Build and Test - Scenario 3 (Unstable - Test Failure)') {
-            steps {
-                script {
-                    echo 'Iniciando build e teste para Cenário 3 (simulando falha de teste)...'
-                    docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
-                        echo 'Dependências instaladas e ambiente de build preparado para Cenário 3.'
-                    }
+        // stage('Build and Test - Scenario 3 (Unstable - Test Failure)') {
+        //     steps {
+        //         script {
+        //             echo 'Iniciando build e teste para Cenário 3 (simulando falha de teste)...'
+        //             docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
+        //                 echo 'Dependências instaladas e ambiente de build preparado para Cenário 3.'
+        //             }
 
-                    try {
-                        docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                            sh """PYTHONPATH=. pytest tests/""" 
-                        }
-                        error('Os testes deveriam ter falhado para o Cenário 3, mas passaram. Verifique o código fonte.')
-                    } catch (Exception e) {
-                        echo "Cenário 3: Testes falharam como esperado: ${e.getMessage()}"
-                        currentBuild.result = 'UNSTABLE'
-                    }
-                }
-            }
-            post {
-                unstable {
-                    echo 'Cenário 3: Build instável (testes falharam) como esperado!'
-                }
-                success {
-                    echo 'Cenário 3: Erro! Os testes não deveriam ter tido sucesso.'
-                }
-            }
-        }
+        //             try {
+        //                 docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
+        //                     sh """PYTHONPATH=. pytest tests/""" 
+        //                 }
+        //                 error('Os testes deveriam ter falhado para o Cenário 3, mas passaram. Verifique o código fonte.')
+        //             } catch (Exception e) {
+        //                 echo "Cenário 3: Testes falharam como esperado: ${e.getMessage()}"
+        //                 currentBuild.result = 'UNSTABLE'
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         unstable {
+        //             echo 'Cenário 3: Build instável (testes falharam) como esperado!'
+        //         }
+        //         success {
+        //             echo 'Cenário 3: Erro! Os testes não deveriam ter tido sucesso.'
+        //         }
+        //     }
+        // }
     }
 
     triggers {
-        cron 'H H * * *' 
+        cron '32 18 * * *' 
     }
     post {
         always {
