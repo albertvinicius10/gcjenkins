@@ -8,13 +8,13 @@ pipeline {
                     echo 'Iniciando o build e teste no container Docker...'
 
                     
-                    docker.build('my-python-app-build', '-f Dockerfile.build .').inside {
+                    docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado.'
                         
                     }
 
                     
-                    docker.build('my-python-app-test', '-f Dockerfile.test .').inside {
+                    docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
                         sh 'pytest tests/'
                         echo 'Testes executados com sucesso no container Docker.'
                     }
@@ -34,7 +34,7 @@ pipeline {
                     echo 'Tentando build para Cenário 2 (simulando falha de compilação/linting)...'
                     try {
                         
-                        docker.build('my-python-app-build', '-f Dockerfile.build .').inside {
+                        docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                             sh 'python -c "import sys; print(\'Simulando erro de sintaxe\'); sys.exit(1)"'
                         }
                         
@@ -62,13 +62,13 @@ pipeline {
                     echo 'Iniciando build e teste para Cenário 3 (simulando falha de teste)...'
 
                     /
-                    docker.build('my-python-app-build', '-f Dockerfile.build .').inside {
+                    docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado para Cenário 3.'
                     }
 
                     
                     try {
-                        docker.build('my-python-app-test', '-f Dockerfile.test .').inside {
+                        docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
                             sh 'pytest tests/'
                         }
                         
