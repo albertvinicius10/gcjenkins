@@ -1,16 +1,17 @@
 pipeline {
     agent any
-
     stages {
         stage('Build and Test - Scenario 1 (Success)') {
             steps {
                 script {
                     echo 'Iniciando o build e teste no container Docker...'
+
                     docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado.'
                     }
                     docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                        sh """pytest tests/"""
+                        
+                        sh """PYTHONPATH=. pytest tests/""" 
                         echo 'Testes executados com sucesso no container Docker.'
                     }
                 }
@@ -21,7 +22,6 @@ pipeline {
                 }
             }
         }
-
         stage('Build - Scenario 2 (Build Failure)') {
             steps {
                 script {
@@ -54,9 +54,10 @@ pipeline {
                     docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
                         echo 'Dependências instaladas e ambiente de build preparado para Cenário 3.'
                     }
+
                     try {
                         docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                            sh """pytest tests/"""
+                            sh """PYTHONPATH=. pytest tests/""" 
                         }
                         error('Os testes deveriam ter falhado para o Cenário 3, mas passaram. Verifique o código fonte.')
                     } catch (Exception e) {
@@ -77,9 +78,8 @@ pipeline {
     }
 
     triggers {
-        cron 'H H * * *'
+        cron 'H H * * *' 
     }
-
     post {
         always {
             echo 'Pipeline concluído.'
