@@ -1,51 +1,51 @@
 pipeline {
     agent any
     stages {
-        stage('Build and Test - Scenario 1 (Success)') {
-            steps {
-                script {
-                    echo 'Iniciando o build e teste no container Docker...'
-
-                    docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
-                        echo 'Dependências instaladas e ambiente de build preparado.'
-                    }
-                    docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
-                        
-                        sh """PYTHONPATH=. pytest tests/""" 
-                        echo 'Testes executados com sucesso no container Docker.'
-                    }
-                }
-            }
-            post {
-                success {
-                    echo 'Cenário 1: Build e Testes OK!'
-                }
-            }
-        }
-        // stage('Build - Scenario 2 (Build Failure)') {
+        // stage('Build and Test - Scenario 1 (Success)') {
         //     steps {
         //         script {
-        //             echo 'Tentando build para Cenário 2 (simulando falha de compilação/linting)...'
-        //             try {
-        //                 docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
-        //                     sh """python -c "import sys; print('Simulando erro de sintaxe ou de build'); sys.exit(1)" """
-        //                 }
-        //                 error('O build deveria ter falhado para o Cenário 2, mas passou. Verifique o código fonte ou o comando de simulação.')
-        //             } catch (Exception e) {
-        //                 echo "Cenário 2: Build falhou como esperado: ${e.getMessage()}"
-        //                 throw e
+        //             echo 'Iniciando o build e teste no container Docker...'
+
+        //             docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
+        //                 echo 'Dependências instaladas e ambiente de build preparado.'
+        //             }
+        //             docker.build('gcjenkins-test', '-f Dockerfile.test .').inside {
+                        
+        //                 sh """PYTHONPATH=. pytest tests/""" 
+        //                 echo 'Testes executados com sucesso no container Docker.'
         //             }
         //         }
         //     }
         //     post {
-        //         failure {
-        //             echo 'Cenário 2: Build falhou como esperado!'
-        //         }
         //         success {
-        //             echo 'Cenário 2: Erro! O build não deveria ter tido sucesso.'
+        //             echo 'Cenário 1: Build e Testes OK!'
         //         }
         //     }
         // }
+        stage('Build - Scenario 2 (Build Failure)') {
+            steps {
+                script {
+                    echo 'Tentando build para Cenário 2 (simulando falha de compilação/linting)...'
+                    try {
+                        docker.build('gcjenkins-build', '-f Dockerfile.build .').inside {
+                            sh """python -c "import sys; print('Simulando erro de sintaxe ou de build'); sys.exit(1)" """
+                        }
+                        error('O build deveria ter falhado para o Cenário 2, mas passou. Verifique o código fonte ou o comando de simulação.')
+                    } catch (Exception e) {
+                        echo "Cenário 2: Build falhou como esperado: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+            post {
+                failure {
+                    echo 'Cenário 2: Build falhou como esperado!'
+                }
+                success {
+                    echo 'Cenário 2: Erro! O build não deveria ter tido sucesso.'
+                }
+            }
+        }
 
         // stage('Build and Test - Scenario 3 (Unstable - Test Failure)') {
         //     steps {
@@ -78,7 +78,7 @@ pipeline {
     }
 
     triggers {
-        cron '47 09 * * *' 
+        cron '* * * * *' 
     }
     post {
         always {
