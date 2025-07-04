@@ -78,7 +78,7 @@ pipeline {
     }
 
     triggers {
-        cron '42 18 * * *' 
+        cron '40 09 * * *' 
     }
     post {
         always {
